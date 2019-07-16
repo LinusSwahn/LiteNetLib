@@ -41,7 +41,7 @@ namespace LiteNetLib
     /// <summary>
     /// Network peer. Main purpose is sending messages to specific peer.
     /// </summary>
-    public class NetPeer
+    public class NetPeer : INetPeer
     {
         //Ping and RTT
         private int _rtt;
@@ -136,7 +136,8 @@ namespace LiteNetLib
         /// <summary>
         /// Peer id can be used as key in your dictionary of peers
         /// </summary>
-        public readonly int Id;
+        public int Id { get; private set; }
+        
 
         /// <summary>
         /// Peer ip address and port
@@ -185,7 +186,7 @@ namespace LiteNetLib
         /// <summary>
 		/// Application defined object containing data about the connection
 		/// </summary>
-        public object Tag;
+        public object Tag { get; set; }
 
         /// <summary>
         /// Statistics of peer connection
@@ -241,7 +242,7 @@ namespace LiteNetLib
         }
 
         //"Connect to" constructor
-        internal NetPeer(NetManager netManager, IPEndPoint remoteEndPoint, int id, byte connectNum, NetDataWriter connectData) 
+        internal NetPeer(NetManager netManager, IPEndPoint remoteEndPoint, int id, byte connectNum, INetDataWriter connectData) 
             : this(netManager, remoteEndPoint, id)
         {
             _connectTime = DateTime.UtcNow.Ticks;
@@ -328,7 +329,7 @@ namespace LiteNetLib
         ///     MTU - headerSize bytes for Unreliable<para/>
         ///     Fragment count exceeded ushort.MaxValue<para/>
         /// </exception>
-        public void Send(NetDataWriter dataWriter, DeliveryMethod options)
+        public void Send(INetDataWriter dataWriter, DeliveryMethod options)
         {
             Send(dataWriter.Data, 0, dataWriter.Length, 0, options);
         }

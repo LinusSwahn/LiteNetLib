@@ -65,24 +65,24 @@ namespace LiteNetLib.Utils
             }
         }
 
-        private delegate void NestedTypeWriter(NetDataWriter writer, object customObj);
+        private delegate void NestedTypeWriter(INetDataWriter writer, object customObj);
         private delegate object NestedTypeReader(NetDataReader reader);
 
         private sealed class ClassInfo<T>
         {
             public static ClassInfo<T> Instance;
-            public readonly Action<T, NetDataWriter>[] WriteDelegate;
+            public readonly Action<T, INetDataWriter>[] WriteDelegate;
             public readonly Action<T, NetDataReader>[] ReadDelegate;
             private readonly int _membersCount;
 
             public ClassInfo(int membersCount)
             {
                 _membersCount = membersCount;
-                WriteDelegate = new Action<T, NetDataWriter>[membersCount];
+                WriteDelegate = new Action<T, INetDataWriter>[membersCount];
                 ReadDelegate = new Action<T, NetDataReader>[membersCount];
             }
 
-            public void Write(T obj, NetDataWriter writer)
+            public void Write(T obj, INetDataWriter writer)
             {
                 for (int i = 0; i < _membersCount; i++)
                     WriteDelegate[i](obj, writer);
@@ -216,7 +216,7 @@ namespace LiteNetLib.Utils
         /// <param name="writeDelegate"></param>
         /// <param name="readDelegate"></param>
         /// <returns>True - if register successful, false - if type already registered</returns>
-        public bool RegisterNestedType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)
+        public bool RegisterNestedType<T>(Action<INetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)
         {
             var t = typeof(T);
             if (BasicTypes.Contains(t) || _registeredNestedTypes.ContainsKey(t))
@@ -607,7 +607,7 @@ namespace LiteNetLib.Utils
         /// <param name="writer">Serialization target NetDataWriter</param>
         /// <param name="obj">Object to serialize</param>
         /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
-        public void Serialize<T>(NetDataWriter writer, T obj) where T : class, new()
+        public void Serialize<T>(INetDataWriter writer, T obj) where T : class, new()
         {
             RegisterInternal<T>().Write(obj, writer);
         }

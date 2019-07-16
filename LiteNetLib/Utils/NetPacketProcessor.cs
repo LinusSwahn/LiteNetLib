@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace LiteNetLib.Utils
 {
-    public class NetPacketProcessor
+    public class NetPacketProcessor : INetPacketProcessor
     {
         protected delegate void SubscribeDelegate(NetDataReader reader, object userData);
         private readonly Dictionary<string, ulong> _hashCache = new Dictionary<string, ulong>();
         private readonly char[] _hashBuffer = new char[1024];
         private readonly NetSerializer _netSerializer;
         private readonly Dictionary<ulong, SubscribeDelegate> _callbacks = new Dictionary<ulong, SubscribeDelegate>();
-        private readonly NetDataWriter _netDataWriter = new NetDataWriter();
+        private readonly INetDataWriter _netDataWriter = new NetDataWriter();
 
         public NetPacketProcessor()
         {
@@ -23,7 +23,7 @@ namespace LiteNetLib.Utils
         }
 
         //FNV-1 64 bit hash
-        protected virtual ulong GetHash(Type type)
+        public ulong GetHash(Type type)
         {
             ulong hash;
             string typeName = type.FullName;
@@ -53,7 +53,7 @@ namespace LiteNetLib.Utils
             return action;
         }
 
-        protected virtual void WriteHash(Type type, NetDataWriter writer)
+        protected virtual void WriteHash(Type type, INetDataWriter writer)
         {
             writer.Put(GetHash(type));
         }
@@ -74,7 +74,7 @@ namespace LiteNetLib.Utils
         /// <param name="writeDelegate"></param>
         /// <param name="readDelegate"></param>
         /// <returns>True - if register successful, false - if type already registered</returns>
-        public bool RegisterNestedType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)
+        public bool RegisterNestedType<T>(Action<INetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)
         {
             return _netSerializer.RegisterNestedType<T>(writeDelegate, readDelegate);
         }
@@ -153,13 +153,13 @@ namespace LiteNetLib.Utils
             manager.SendToAll(_netDataWriter, options);
         }
 
-        public void Write<T>(NetDataWriter writer, T packet) where T : class, new()
+        public void Write<T>(INetDataWriter writer, T packet) where T : class, new()
         {
             WriteHash(typeof(T), writer);
             _netSerializer.Serialize(writer, packet);
         }
 
-        public void WriteNetSerializable<T>(NetDataWriter writer, T packet) where T : INetSerializable
+        public void WriteNetSerializable<T>(INetDataWriter writer, T packet) where T : INetSerializable
         {
             WriteHash(typeof(T), writer);
             packet.Serialize(writer);

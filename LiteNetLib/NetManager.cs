@@ -76,7 +76,7 @@ namespace LiteNetLib
     /// <summary>
     /// Main class for all network operations. Can be used as client and/or server.
     /// </summary>
-    public class NetManager : INetSocketListener, IConnectionRequestListener, IEnumerable<NetPeer>
+    public class NetManager : INetSocketListener, IConnectionRequestListener, IEnumerable<NetPeer>, INetManager
     {
         private class IPEndPointComparer : IEqualityComparer<IPEndPoint>
         {
@@ -881,7 +881,7 @@ namespace LiteNetLib
         /// </summary>
         /// <param name="writer">DataWriter with data</param>
         /// <param name="options">Send options (reliable, unreliable, etc.)</param>
-        public void SendToAll(NetDataWriter writer, DeliveryMethod options)
+        public void SendToAll(INetDataWriter writer, DeliveryMethod options)
         {
             SendToAll(writer.Data, 0, writer.Length, options);
         }
@@ -914,7 +914,7 @@ namespace LiteNetLib
         /// <param name="writer">DataWriter with data</param>
         /// <param name="channelNumber">Number of channel (from 0 to channelsCount - 1)</param>
         /// <param name="options">Send options (reliable, unreliable, etc.)</param>
-        public void SendToAll(NetDataWriter writer, byte channelNumber, DeliveryMethod options)
+        public void SendToAll(INetDataWriter writer, byte channelNumber, DeliveryMethod options)
         {
             SendToAll(writer.Data, 0, writer.Length, channelNumber, options);
         }
@@ -950,7 +950,7 @@ namespace LiteNetLib
         /// <param name="writer">DataWriter with data</param>
         /// <param name="options">Send options (reliable, unreliable, etc.)</param>
         /// <param name="excludePeer">Excluded peer</param>
-        public void SendToAll(NetDataWriter writer, DeliveryMethod options, NetPeer excludePeer)
+        public void SendToAll(INetDataWriter writer, DeliveryMethod options, NetPeer excludePeer)
         {
             SendToAll(writer.Data, 0, writer.Length, 0, options, excludePeer);
         }
@@ -986,7 +986,7 @@ namespace LiteNetLib
         /// <param name="channelNumber">Number of channel (from 0 to channelsCount - 1)</param>
         /// <param name="options">Send options (reliable, unreliable, etc.)</param>
         /// <param name="excludePeer">Excluded peer</param>
-        public void SendToAll(NetDataWriter writer, byte channelNumber, DeliveryMethod options, NetPeer excludePeer)
+        public void SendToAll(INetDataWriter writer, byte channelNumber, DeliveryMethod options, NetPeer excludePeer)
         {
             SendToAll(writer.Data, 0, writer.Length, channelNumber, options, excludePeer);
         }
@@ -1087,7 +1087,7 @@ namespace LiteNetLib
         /// <param name="writer">Data serializer</param>
         /// <param name="remoteEndPoint">Packet destination</param>
         /// <returns>Operation result</returns>
-        public bool SendUnconnectedMessage(NetDataWriter writer, IPEndPoint remoteEndPoint)
+        public bool SendUnconnectedMessage(INetDataWriter writer, IPEndPoint remoteEndPoint)
         {
             return SendUnconnectedMessage(writer.Data, 0, writer.Length, remoteEndPoint);
         }
@@ -1109,7 +1109,7 @@ namespace LiteNetLib
             return result;
         }
 
-        public bool SendBroadcast(NetDataWriter writer, int port)
+        public bool SendBroadcast(INetDataWriter writer, int port)
         {
             return SendBroadcast(writer.Data, 0, writer.Length, port);
         }
@@ -1180,7 +1180,7 @@ namespace LiteNetLib
         /// <param name="connectionData">Additional data for remote peer</param>
         /// <returns>New NetPeer if new connection, Old NetPeer if already connected</returns>
         /// <exception cref="InvalidOperationException">Manager is not running. Call <see cref="Start()"/></exception>
-        public NetPeer Connect(string address, int port, NetDataWriter connectionData)
+        public NetPeer Connect(string address, int port, INetDataWriter connectionData)
         {
             IPEndPoint ep;
             try
@@ -1214,7 +1214,7 @@ namespace LiteNetLib
         /// <param name="connectionData">Additional data for remote peer</param>
         /// <returns>New NetPeer if new connection, Old NetPeer if already connected</returns>
         /// <exception cref="InvalidOperationException">Manager is not running. Call <see cref="Start()"/></exception>
-        public NetPeer Connect(IPEndPoint target, NetDataWriter connectionData)
+        public NetPeer Connect(IPEndPoint target, INetDataWriter connectionData)
         {
             if (!IsRunning)
                 throw new InvalidOperationException("Client is not running");
@@ -1400,7 +1400,7 @@ namespace LiteNetLib
         /// </summary>
         /// <param name="peer">peer to disconnect</param>
         /// <param name="writer">additional data</param>
-        public void DisconnectPeer(NetPeer peer, NetDataWriter writer)
+        public void DisconnectPeer(NetPeer peer, INetDataWriter writer)
         {
             DisconnectPeer(peer, writer.Data, 0, writer.Length);
         }

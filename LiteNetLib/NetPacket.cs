@@ -194,7 +194,7 @@ namespace LiteNetLib
             return new NetConnectRequestPacket(connectionId, packet.ConnectionNumber, reader);
         }
 
-        public static NetPacket Make(NetDataWriter connectData, long connectId)
+        public static NetPacket Make(INetDataWriter connectData, long connectId)
         {
             //Make initial packet
             var packet = new NetPacket(PacketProperty.ConnectRequest, connectData.Length);
