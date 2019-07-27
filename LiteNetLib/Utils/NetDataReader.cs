@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LiteNetLib.Utils
 {
-    public class NetDataReader
+    public class NetDataReader : INetDataReader
     {
         protected byte[] _data;
         protected int _position;
