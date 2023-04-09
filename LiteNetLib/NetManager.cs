@@ -147,17 +147,17 @@ namespace LiteNetLib
             public IPEndPoint EndPoint;
             public DateTime TimeWhenGet;
         }
-        private readonly List<IncomingData> _pingSimulationList = new List<IncomingData>();
-        private readonly Random _randomGenerator = new Random();
+        private readonly List<IncomingData> _pingSimulationList = new();
+        private readonly Random _randomGenerator = new();
         private const int MinLatencyThreshold = 5;
 #endif
 
         private Thread _logicThread;
         private bool _manualMode;
-        private readonly AutoResetEvent _updateTriggerEvent = new AutoResetEvent(true);
+        private readonly AutoResetEvent _updateTriggerEvent = new(true);
 
-        private Queue<NetEvent> _netEventsProduceQueue = new Queue<NetEvent>();
-        private Queue<NetEvent> _netEventsConsumeQueue = new Queue<NetEvent>();
+        private Queue<NetEvent> _netEventsProduceQueue = new();
+        private Queue<NetEvent> _netEventsConsumeQueue = new();
 
         private NetEvent _netEventPoolHead;
         private readonly INetEventListener _netEventListener;
@@ -165,19 +165,19 @@ namespace LiteNetLib
         private readonly INtpEventListener _ntpEventListener;
         private readonly IPeerAddressChangedListener _peerAddressChangedListener;
 
-        private readonly Dictionary<IPEndPoint, NetPeer> _peersDict = new Dictionary<IPEndPoint, NetPeer>(new IPEndPointComparer());
-        private readonly Dictionary<IPEndPoint, ConnectionRequest> _requestsDict = new Dictionary<IPEndPoint, ConnectionRequest>(new IPEndPointComparer());
-        private readonly Dictionary<IPEndPoint, NtpRequest> _ntpRequests = new Dictionary<IPEndPoint, NtpRequest>(new IPEndPointComparer());
-        private readonly ReaderWriterLockSlim _peersLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private readonly Dictionary<IPEndPoint, NetPeer> _peersDict = new(new IPEndPointComparer());
+        private readonly Dictionary<IPEndPoint, ConnectionRequest> _requestsDict = new(new IPEndPointComparer());
+        private readonly Dictionary<IPEndPoint, NtpRequest> _ntpRequests = new(new IPEndPointComparer());
+        private readonly ReaderWriterLockSlim _peersLock = new(LockRecursionPolicy.NoRecursion);
         private volatile NetPeer _headPeer;
         private int _connectedPeersCount;
-        private readonly List<NetPeer> _connectedPeerListCache = new List<NetPeer>();
+        private readonly List<NetPeer> _connectedPeerListCache = new();
         private NetPeer[] _peersArray = new NetPeer[32];
         private readonly PacketLayerBase _extraPacketLayer;
         private int _lastPeerId;
-        private ConcurrentQueue<int> _peerIds = new ConcurrentQueue<int>();
+        private ConcurrentQueue<int> _peerIds = new();
         private byte _channelsCount = 1;
-        private readonly object _eventLock = new object();
+        private readonly object _eventLock = new();
 
         //config section
         /// <summary>
@@ -271,7 +271,7 @@ namespace LiteNetLib
         /// <summary>
         /// Statistics of all connections
         /// </summary>
-        public readonly NetStatistics Statistics = new NetStatistics();
+        public readonly NetStatistics Statistics = new();
 
         /// <summary>
         /// Toggles the collection of network statistics for the instance and all known peers

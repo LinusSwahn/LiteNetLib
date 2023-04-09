@@ -76,11 +76,11 @@ namespace LiteNetLib
         }
 
         private readonly NetManager _socket;
-        private readonly ConcurrentQueue<RequestEventData> _requestEvents = new ConcurrentQueue<RequestEventData>();
-        private readonly ConcurrentQueue<SuccessEventData> _successEvents = new ConcurrentQueue<SuccessEventData>();
-        private readonly NetDataReader _cacheReader = new NetDataReader();
-        private readonly NetDataWriter _cacheWriter = new NetDataWriter();
-        private readonly NetPacketProcessor _netPacketProcessor = new NetPacketProcessor(MaxTokenLength);
+        private readonly ConcurrentQueue<RequestEventData> _requestEvents = new();
+        private readonly ConcurrentQueue<SuccessEventData> _successEvents = new();
+        private readonly NetDataReader _cacheReader = new();
+        private readonly NetDataWriter _cacheWriter = new();
+        private readonly NetPacketProcessor _netPacketProcessor = new(MaxTokenLength);
         private INatPunchListener _natPunchListener;
         public const int MaxTokenLength = 256;
 

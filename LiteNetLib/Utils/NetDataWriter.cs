@@ -29,7 +29,7 @@ namespace LiteNetLib.Utils
             get => _position;
         }
 
-        public static readonly ThreadLocal<UTF8Encoding> uTF8Encoding = new ThreadLocal<UTF8Encoding>(() => new UTF8Encoding(false, true));
+        public static readonly ThreadLocal<UTF8Encoding> uTF8Encoding = new(() => new UTF8Encoding(false, true));
         public const int StringBufferMaxLength = 65535;
         private readonly byte[] _stringBuffer = new byte[StringBufferMaxLength];
 

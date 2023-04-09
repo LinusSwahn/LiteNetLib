@@ -44,7 +44,7 @@ namespace LiteNetLib
 #endif
         [ThreadStatic] private static byte[] _endPointBuffer;
 
-        private readonly Dictionary<NativeAddr, IPEndPoint> _nativeAddrMap = new Dictionary<NativeAddr, IPEndPoint>();
+        private readonly Dictionary<NativeAddr, IPEndPoint> _nativeAddrMap = new();
 
         private const int SioUdpConnreset = -1744830452; //SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12
         private static readonly IPAddress MulticastAddressV6 = IPAddress.Parse("ff02::1");

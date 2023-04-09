@@ -129,7 +129,7 @@ namespace LiteNetLib
             }
         }
 
-        private static readonly List<string> IpList = new List<string>();
+        private static readonly List<string> IpList = new();
         /// <summary>
         /// Get first detected local ip address
         /// </summary>

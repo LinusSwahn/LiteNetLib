@@ -557,7 +557,7 @@ namespace LiteNetLib.Utils
 
         private NetDataWriter _writer;
         private readonly int _maxStringLength;
-        private readonly Dictionary<Type, CustomType> _registeredTypes = new Dictionary<Type, CustomType>();
+        private readonly Dictionary<Type, CustomType> _registeredTypes = new();
 
         public NetSerializer() : this(0)
         {

@@ -25,7 +25,7 @@ namespace LiteNetLib.Utils
 
         protected delegate void SubscribeDelegate(NetDataReader reader, object userData);
         private readonly NetSerializer _netSerializer;
-        private readonly Dictionary<ulong, SubscribeDelegate> _callbacks = new Dictionary<ulong, SubscribeDelegate>();
+        protected readonly Dictionary<ulong, SubscribeDelegate> _callbacks = new();
 
         public NetPacketProcessor()
         {
@@ -37,7 +37,7 @@ namespace LiteNetLib.Utils
             _netSerializer = new NetSerializer(maxStringLength);
         }
 
-        protected virtual ulong GetHash<T>()
+        public virtual ulong GetHash<T>()
         {
             return HashCache<T>.Id;
         }

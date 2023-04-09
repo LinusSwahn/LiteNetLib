@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using LiteNetLib.Utils;
 
 namespace LiteNetLib
@@ -50,7 +51,7 @@ namespace LiteNetLib
     /// <summary>
     /// Network peer. Main purpose is sending messages to specific peer.
     /// </summary>
-    public class NetPeer
+    public class NetPeer : IPeer
     {
         //Ping and RTT
         private int _rtt;
@@ -59,12 +60,12 @@ namespace LiteNetLib
         private double _resendDelay = 27.0;
         private int _pingSendTimer;
         private int _rttResetTimer;
-        private readonly Stopwatch _pingTimer = new Stopwatch();
+        private readonly Stopwatch _pingTimer = new();
         private int _timeSinceLastPacket;
         private long _remoteDelta;
 
         //Common
-        private readonly object _shutdownLock = new object();
+        private readonly object _shutdownLock = new();
 
         internal volatile NetPeer NextPeer;
         internal NetPeer PrevPeer;
@@ -94,7 +95,7 @@ namespace LiteNetLib
         private int _mtuCheckAttempts;
         private const int MtuCheckDelay = 1000;
         private const int MaxMtuCheckAttempts = 4;
-        private readonly object _mtuMutex = new object();
+        private readonly object _mtuMutex = new();
 
         //Fragment
         private class IncomingFragments
@@ -136,7 +137,7 @@ namespace LiteNetLib
         /// <summary>
         /// Peer parent NetManager
         /// </summary>
-        public readonly NetManager NetManager;
+        public NetManager NetManager { get; }
 
         /// <summary>
         /// Current connection state
@@ -151,7 +152,7 @@ namespace LiteNetLib
         /// <summary>
         /// Peer id can be used as key in your dictionary of peers
         /// </summary>
-        public readonly int Id;
+        public int Id { get; }
 
         /// <summary>
         /// Id assigned from server
@@ -182,7 +183,7 @@ namespace LiteNetLib
         /// <summary>
         /// Remote UTC time (not accurate)
         /// </summary>
-        public DateTime RemoteUtcTime => new DateTime(DateTime.UtcNow.Ticks + _remoteDelta);
+        public DateTime RemoteUtcTime => new(DateTime.UtcNow.Ticks + _remoteDelta);
 
         /// <summary>
         /// Time since last packet received (including internal library packets)
@@ -194,7 +195,7 @@ namespace LiteNetLib
         /// <summary>
         /// Application defined object containing data about the connection
         /// </summary>
-        public object Tag;
+        public object Tag { get; }
 
         /// <summary>
         /// Statistics of peer connection
