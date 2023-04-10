@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Net;
 using System.Runtime.Serialization;
+using Serilog;
 
 namespace LiteNetLib.Utils
 {
@@ -682,8 +683,9 @@ namespace LiteNetLib.Utils
             {
                 info.Read(result, reader);
             }
-            catch
+            catch(Exception e)
             {
+                Log.Logger.Error(e, "Failed to deserialize {Type}", typeof(T).Name);
                 return null;
             }
             return result;
@@ -703,8 +705,9 @@ namespace LiteNetLib.Utils
             {
                 info.Read(target, reader);
             }
-            catch
+            catch(Exception e)
             {
+                Log.Logger.Error(e, "Failed to deserialize {Type}", typeof(T).Name);
                 return false;
             }
             return true;
