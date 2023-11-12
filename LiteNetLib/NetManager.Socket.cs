@@ -374,6 +374,24 @@ namespace LiteNetLib
             return true;
         }
 
+         /// <summary>
+        /// Start with custom transport
+        /// </summary>
+        /// <param name="transport"></param>
+        public bool StartWithoutSocket(ITransport transport)
+        {
+            if (IsRunning && NotConnected == false)
+                return false;
+
+            NotConnected = false;
+            IsRunning = true;
+
+            _transport = transport;
+            _manualMode = true;
+
+            return true;
+        }
+
         private bool BindSocket(Socket socket, IPEndPoint ep)
         {
             //Setup socket
@@ -505,6 +523,12 @@ namespace LiteNetLib
                 start = 0;
                 _extraPacketLayer.ProcessOutBoundPacket(ref remoteEndPoint, ref expandedPacket.RawData, ref start, ref length);
                 message = expandedPacket.RawData;
+            }
+
+            if (_transport != null)
+            {
+                _transport.Send(message, start, length, remoteEndPoint);
+                return length;
             }
 
             var socket = _udpSocketv4;

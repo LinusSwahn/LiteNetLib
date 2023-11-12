@@ -6,84 +6,12 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using LiteNetLib.Layers;
 using LiteNetLib.Utils;
 
 namespace LiteNetLib
 {
-    public sealed class NetPacketReader : NetDataReader
-    {
-        private NetPacket _packet;
-        private readonly NetManager _manager;
-        private readonly NetEvent _evt;
-
-        internal NetPacketReader(NetManager manager, NetEvent evt)
-        {
-            _manager = manager;
-            _evt = evt;
-        }
-
-        internal void SetSource(NetPacket packet, int headerSize)
-        {
-            if (packet == null)
-                return;
-            _packet = packet;
-            SetSource(packet.RawData, headerSize, packet.Size);
-        }
-
-        internal void RecycleInternal()
-        {
-            Clear();
-            if (_packet != null)
-                _manager.PoolRecycle(_packet);
-            _packet = null;
-            _manager.RecycleEvent(_evt);
-        }
-
-        public void Recycle()
-        {
-            if (_manager.AutoRecycle)
-                return;
-            RecycleInternal();
-        }
-    }
-
-    internal sealed class NetEvent
-    {
-        public NetEvent Next;
-
-        public enum EType
-        {
-            Connect,
-            Disconnect,
-            Receive,
-            ReceiveUnconnected,
-            Error,
-            ConnectionLatencyUpdated,
-            Broadcast,
-            ConnectionRequest,
-            MessageDelivered,
-            PeerAddressChanged
-        }
-        public EType Type;
-
-        public NetPeer Peer;
-        public IPEndPoint RemoteEndPoint;
-        public object UserData;
-        public int Latency;
-        public SocketError ErrorCode;
-        public DisconnectReason DisconnectReason;
-        public ConnectionRequest ConnectionRequest;
-        public DeliveryMethod DeliveryMethod;
-        public byte ChannelNumber;
-        public readonly NetPacketReader DataReader;
-
-        public NetEvent(NetManager manager)
-        {
-            DataReader = new NetPacketReader(manager, this);
-        }
-    }
-
     /// <summary>
     /// Main class for all network operations. Can be used as client and/or server.
     /// </summary>
@@ -326,6 +254,8 @@ namespace LiteNetLib
         /// Allows peer change it's ip (lte to wifi, wifi to lte, etc). Use only on server
         /// </summary>
         public bool AllowPeerAddressChange = false;
+
+        private ITransport _transport;
 
         /// <summary>
         /// QoS channel count per message type (value must be between 1 and 64 channels)
@@ -875,7 +805,7 @@ namespace LiteNetLib
             CreateEvent(NetEvent.EType.ConnectionRequest, connectionRequest: req);
         }
 
-        private void OnMessageReceived(NetPacket packet, IPEndPoint remoteEndPoint)
+        public void OnMessageReceived(NetPacket packet, IPEndPoint remoteEndPoint)
         {
 #if DEBUG
             if (SimulatePacketLoss && _randomGenerator.NextDouble() * 100 < SimulationPacketLossChance)
@@ -1472,7 +1402,7 @@ namespace LiteNetLib
         /// </summary>
         public void PollEvents()
         {
-            if (_manualMode)
+            if (_transport == null && _manualMode)
             {
                 if (_udpSocketv4 != null)
                     ManualReceive(_udpSocketv4, _bufferEndPointv4);
@@ -1585,6 +1515,49 @@ namespace LiteNetLib
             //Create reliable connection
             //And send connection request
             peer = new NetPeer(this, target, GetNextPeerId(), connectionNumber, connectionData);
+            AddPeer(peer);
+            _peersLock.ExitUpgradeableReadLock();
+
+            return peer;
+        }
+
+        /// <summary>
+        /// Connect to remote host
+        /// </summary>
+        /// <param name="target">Server end point (ip and port)</param>
+        /// <returns>New NetPeer if new connection, Old NetPeer if already connected, null peer if there is ConnectionRequest awaiting</returns>
+        /// <exception cref="InvalidOperationException">Manager is not running. Call <see cref="Start()"/></exception>
+        public NetPeer Connect(byte target)
+        {
+            if (!IsRunning)
+                throw new InvalidOperationException("Client is not running");
+
+            lock(_requestsDict)
+            {
+                if (_requestsDict.ContainsKey(target.ToEndpoint()))
+                    return null;
+            }
+
+            byte connectionNumber = 0;
+            _peersLock.EnterUpgradeableReadLock();
+            if (_peersDict.TryGetValue(target.ToEndpoint(), out var peer))
+            {
+                switch (peer.ConnectionState)
+                {
+                    //just return already connected peer
+                    case ConnectionState.Connected:
+                    case ConnectionState.Outgoing:
+                        _peersLock.ExitUpgradeableReadLock();
+                        return peer;
+                }
+                //else reconnect
+                connectionNumber = (byte)((peer.ConnectionNum + 1) % NetConstants.MaxConnectionNumber);
+                RemovePeer(peer);
+            }
+
+            //Create reliable connection
+            //And send connection request
+            peer = new NetPeer(this, target.ToEndpoint(), GetNextPeerId(), connectionNumber, NetDataWriter.FromString(""));
             AddPeer(peer);
             _peersLock.ExitUpgradeableReadLock();
 

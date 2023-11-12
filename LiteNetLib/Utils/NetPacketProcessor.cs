@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace LiteNetLib.Utils
 {
@@ -142,7 +143,8 @@ namespace LiteNetLib.Utils
         /// <exception cref="ParseException">Malformed packet</exception>
         public void ReadPacket(NetDataReader reader, object userData)
         {
-            GetCallbackFromData(reader)(reader, userData);
+            var callback = GetCallbackFromData(reader);
+            callback(reader, userData);
         }
 
         /// <summary>
@@ -205,6 +207,27 @@ namespace LiteNetLib.Utils
             {
                 _netSerializer.Deserialize(reader, reference);
                 onReceive(reference);
+            };
+        }
+        /// <summary>
+        /// Register and subscribe to packet receive event
+        /// This method will overwrite last received packet class on receive (less garbage)
+        /// </summary>
+        /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
+        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        public void SubscribeReusableAsync<
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
+#endif
+        T>(Func<T, Task> onReceive) where T : class, new()
+        {
+            _netSerializer.Register<T>();
+            var reference = new T();
+            _callbacks[GetHash<T>()] = (reader, userData) =>
+            {
+                _netSerializer.Deserialize(reader, reference);
+
+                onReceive.Invoke(reference);
             };
         }
 

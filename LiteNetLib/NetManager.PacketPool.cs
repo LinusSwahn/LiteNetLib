@@ -14,7 +14,7 @@ namespace LiteNetLib
         public int PacketPoolSize = 1000;
 
         public int PoolCount => _poolCount;
-        
+
         private NetPacket PoolGetWithData(PacketProperty property, byte[] data, int start, int length)
         {
             int headerSize = NetPacket.GetHeaderSize(property);
@@ -39,7 +39,7 @@ namespace LiteNetLib
             return packet;
         }
 
-        internal NetPacket PoolGetPacket(int size)
+        public NetPacket PoolGetPacket(int size)
         {
             if (size > NetConstants.MaxPacketSize)
                 return new NetPacket(size);
@@ -50,25 +50,25 @@ namespace LiteNetLib
                 packet = _poolHead;
                 if (packet == null)
                     return new NetPacket(size);
-                
+
                 _poolHead = _poolHead.Next;
                 _poolCount--;
             }
-            
+
             packet.Size = size;
             if (packet.RawData.Length < size)
                 packet.RawData = new byte[size];
             return packet;
         }
 
-        internal void PoolRecycle(NetPacket packet)
+        public void PoolRecycle(NetPacket packet)
         {
             if (packet.RawData.Length > NetConstants.MaxPacketSize || _poolCount >= PacketPoolSize)
             {
                 //Don't pool big packets. Save memory
                 return;
             }
-            
+
             //Clean fragmented flag
             packet.RawData[0] = 0;
             lock (_poolLock)
