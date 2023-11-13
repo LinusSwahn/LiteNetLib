@@ -1583,7 +1583,7 @@ namespace LiteNetLib
             NetDebug.Write("[NM] Stop");
 
 #if UNITY_2018_3_OR_NEWER
-            _pausedSocketFix.Deinitialize();
+            _pausedSocketFix?.Deinitialize();
             _pausedSocketFix = null;
 #endif
 
