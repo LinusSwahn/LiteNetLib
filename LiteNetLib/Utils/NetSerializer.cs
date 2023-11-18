@@ -556,6 +556,7 @@ namespace LiteNetLib.Utils
             _registeredTypes.Add(typeof(T), new CustomTypeStatic<T>(writer, reader));
         }
 
+        private NetDataReader _reader;
         private NetDataWriter _writer;
         private readonly int _maxStringLength;
         private readonly Dictionary<Type, CustomType> _registeredTypes = new Dictionary<Type, CustomType>();
@@ -703,6 +704,34 @@ namespace LiteNetLib.Utils
         }
 
         /// <summary>
+        /// Reads packet with known type
+        /// </summary>
+        /// <param name="reader">NetDataReader with packet</param>
+        /// <returns>Returns packet if packet in reader is matched type</returns>
+        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        public T Deserialize<
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
+#endif
+        T>(byte[] data) where T : class, new()
+        {
+            var info = RegisterInternal<T>();
+            var result = new T();
+            _reader = _reader ?? new NetDataReader();
+            _reader.SetSource(data);
+            try
+            {
+                info.Read(result, _reader);
+            }
+            catch
+            {
+                return null;
+            }
+            _reader.Clear();
+            return result;
+        }
+
+        /// <summary>
         /// Reads packet with known type (non alloc variant)
         /// </summary>
         /// <param name="reader">NetDataReader with packet</param>
@@ -753,8 +782,7 @@ namespace LiteNetLib.Utils
 #endif
         T>(T obj) where T : class, new()
         {
-            if (_writer == null)
-                _writer = new NetDataWriter();
+            _writer ??= new NetDataWriter();
             _writer.Reset();
             Serialize(_writer, obj);
             return _writer.CopyData();

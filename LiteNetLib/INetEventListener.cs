@@ -86,19 +86,6 @@ namespace LiteNetLib
         void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod);
 
         /// <summary>
-        /// Received some data
-        /// </summary>
-        /// <param name="peer">From peer</param>
-        /// <param name="reader">DataReader containing all received data</param>
-        /// <param name="channelNumber">Number of channel at which packet arrived</param>
-        /// <param name="deliveryMethod">Type of received packet</param>
-        Task OnNetworkReceiveAsync(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
-        {
-            OnNetworkReceive(peer, reader, channelNumber, deliveryMethod);
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
         /// Received unconnected message
         /// </summary>
         /// <param name="remoteEndPoint">From address (IP and Port)</param>
