@@ -547,7 +547,15 @@ namespace LiteNetLib
 
             if (_transport != null)
             {
-                _transport.Send(message, start, length, remoteEndPoint);
+                try
+                {
+                    _transport.Send(message, start, length, remoteEndPoint);
+                }
+                catch (Exception ex)
+                {
+                    NetDebug.WriteError($"[S] {ex}");
+                    return 0;
+                }
                 return length;
             }
 
